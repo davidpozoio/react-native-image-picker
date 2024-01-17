@@ -3,56 +3,21 @@ import { StyleSheet, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import ViewerImage from "./components/ViewerImage";
 import Button from "./components/Button";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import EmojiOptions from "./components/EmojiOptions";
 import EmojiPicker from "./components/EmojiPicker";
 import EmojiList from "./components/EmojiList";
 import EmojiSticker from "./components/EmojiSticker";
-import { captureRef } from "react-native-view-shot";
-import * as MediaLibrary from "expo-media-library";
 
-const imageSource = require("./assets/background-image.jpg");
+import useImagePicker from "./hooks/useImagePicker";
+import useSaveImage from "./hooks/useSaveImage";
 
 export default function App() {
-  const [image, setImage] = useState(imageSource);
+  const { image, pickImage } = useImagePicker();
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emoji, setEmoji] = useState(null);
-  const [status, requestPermission] = MediaLibrary.usePermissions();
-  const imageRef = useRef();
-
-  if (status === null) {
-    requestPermission();
-  }
-
-  const onSaveImageAsync = async () => {
-    try {
-      const localUri = await captureRef(imageRef, {
-        height: 440,
-        quality: 1,
-      });
-
-      await MediaLibrary.saveToLibraryAsync(localUri);
-      if (localUri) {
-        alert("Saved!");
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled) {
-      console.log(result.assets[0]);
-      setImage(result.assets[0]);
-    } else {
-      alert("you didn't select any image");
-    }
-  };
+  const { imageRef, onSaveImageAsync } = useSaveImage();
 
   return (
     <View style={[styles.container]}>
